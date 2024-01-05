@@ -17,9 +17,11 @@ public class User {
     private Long id;
     private String firstName;
     private String lastName;
+    @Column(unique = true)
     private String email;
     private String address;
     private String stateOfOrigin;
+    @Column(unique = true)
     private String accountNumber;
     private BigDecimal accountBalance;
     private String status;
@@ -31,8 +33,7 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String firstName, String lastName, String email, String address, String stateOfOrigin, String accountNumber, BigDecimal accountBalance, String status, LocalDateTime createdAt, LocalDateTime modifiedAt) {
-        this.id = id;
+    public User(String firstName, String lastName, String email, String address, String stateOfOrigin, String accountNumber, BigDecimal accountBalance, String status) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
