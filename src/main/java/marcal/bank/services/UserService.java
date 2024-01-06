@@ -13,8 +13,10 @@ public interface UserService {
 
     BankResponse balanceEnquiry(EnquiryRequest enquiryRequest) throws Exception;
 
-    void validateWithdraw(DepositWithdrawRequest request) throws Exception;
+    void validateWithdraw(String accountNumber, BigDecimal amount) throws Exception;
 
     BankResponse deposit (DepositWithdrawRequest deposit) throws Exception;
+    BankResponse withdraw (DepositWithdrawRequest deposit) throws Exception;
+    BankResponse transfer(TransferRequest transferRequest) throws Exception;
 
 }

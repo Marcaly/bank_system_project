@@ -53,11 +53,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void validateWithdraw(DepositWithdrawRequest request) throws Exception {
-        User user = userRepository.findByAccountNumber(request.accountNumber());
-        verifyIfUserExists(request.accountNumber());
+    public void validateWithdraw(String accountNumber, BigDecimal amount) throws Exception {
+        User user = userRepository.findByAccountNumber(accountNumber);
+        verifyIfUserExists(accountNumber);
 
-        if (user.getAccountBalance().compareTo(request.amount()) < 0) {
+        if (user.getAccountBalance().compareTo(amount) < 0) {
             throw new Exception("Insuficient balance");
         }
     }
@@ -70,7 +70,37 @@ public class UserServiceImpl implements UserService {
         user.setAccountBalance(user.getAccountBalance().add(deposit.amount()));
         userRepository.save(user);
 
-        return new BankResponse("137", "Account has been successfully debited", new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
+        return new BankResponse("137", "Account has been successfully debited",
+                new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
+    }
+
+    @Override
+    public BankResponse withdraw(DepositWithdrawRequest deposit) throws Exception {
+        validateWithdraw(deposit.accountNumber(), deposit.amount());
+
+        User user = userRepository.findByAccountNumber(deposit.accountNumber());
+
+        user.setAccountBalance(user.getAccountBalance().subtract(deposit.amount()));
+        userRepository.save(user);
+
+        return new BankResponse("138", "Withdraw successfully! Current Account balance: " + user.getAccountBalance(),
+                new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
+    }
+
+    @Override
+    public BankResponse transfer(TransferRequest transferRequest) throws Exception {
+        User sender = userRepository.findByAccountNumber(transferRequest.sourceAccountNumber());
+        User receiver = userRepository.findByAccountNumber(transferRequest.destinationAccountNumber());
+
+        validateWithdraw(sender.getAccountNumber(),transferRequest.amount());
+
+        sender.setAccountBalance(sender.getAccountBalance().subtract(transferRequest.amount()));
+        receiver.setAccountBalance(receiver.getAccountBalance().add(transferRequest.amount()));
+
+        userRepository.save(sender);
+        userRepository.save(receiver);
+
+        return new BankResponse("855", "Transfer success", null);
     }
 
 

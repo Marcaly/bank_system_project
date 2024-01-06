@@ -1,11 +1,10 @@
 package marcal.bank.controllers;
 
-import marcal.bank.entities.records.BankResponse;
-import marcal.bank.entities.records.DepositWithdrawRequest;
-import marcal.bank.entities.records.EnquiryRequest;
-import marcal.bank.entities.records.UserRequest;
+import marcal.bank.entities.records.*;
 import marcal.bank.services.UserService;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,17 +15,27 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public BankResponse createAccount(@RequestBody UserRequest userRequest) {
-        return userService.createAccount(userRequest);
+    public ResponseEntity<BankResponse> createAccount(@RequestBody UserRequest userRequest) {
+        return ResponseEntity.ok().body(userService.createAccount(userRequest));
     }
 
     @GetMapping("balanceEnquiry")
-    public BankResponse balanceEnquiry(@RequestBody EnquiryRequest request) throws Exception {
-        return userService.balanceEnquiry(request);
+    public ResponseEntity<BankResponse> balanceEnquiry(@RequestBody EnquiryRequest request) throws Exception {
+        return ResponseEntity.ok(userService.balanceEnquiry(request));
     }
 
     @PostMapping("deposit")
     public BankResponse deposit(@RequestBody DepositWithdrawRequest deposit) throws Exception {
         return userService.deposit(deposit);
+    }
+
+    @PostMapping("withdraw")
+    public BankResponse withdraw(@RequestBody DepositWithdrawRequest withdraw) throws Exception {
+        return userService.withdraw(withdraw);
+    }
+
+    @PostMapping("transfer")
+    public BankResponse transfer(@RequestBody TransferRequest transferRequest) throws Exception {
+        return userService.transfer(transferRequest);
     }
 }
