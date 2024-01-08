@@ -16,6 +16,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    EmailServiceImpl emailService;
+
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
 
@@ -25,6 +28,9 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(newUser);
 
+        EmailDetails emailDetails = new EmailDetails(userRequest.email(), "Account successfully created.\nYour account number is: " + newUser.getAccountNumber(),"ACCOUNT CREATION");
+        emailService.sendEmailAlert(emailDetails);
+
         return new BankResponse("003", "Account successfully created", new AccountInfo(createUserName(newUser.getFirstName(), newUser.getLastName()), newUser.getAccountBalance(), newUser.getAccountNumber()));
     }
 
@@ -33,7 +39,7 @@ public class UserServiceImpl implements UserService {
     public void verifyIfUserExists(String accountNumber) throws Exception {
         boolean isAccountExistsByAccountNumber = userRepository.existsByAccountNumber(accountNumber);
         if (!isAccountExistsByAccountNumber) {
-            throw new Exception("Account with this number not exists");
+            throw new Exception("Account with this number doesn't exists");
         }
     }
 
@@ -70,18 +76,23 @@ public class UserServiceImpl implements UserService {
         user.setAccountBalance(user.getAccountBalance().add(deposit.amount()));
         userRepository.save(user);
 
+        EmailDetails emailDetails = new EmailDetails(user.getEmail(),"you deposited successfully " + deposit.amount() + " in you account!\nNew account balance: $" + user.getAccountBalance() + user.getAccountNumber(),"DEPOSIT SUCCESS");
+        emailService.sendEmailAlert(emailDetails);
         return new BankResponse("137", "Account has been successfully debited",
                 new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
     }
 
     @Override
-    public BankResponse withdraw(DepositWithdrawRequest deposit) throws Exception {
-        validateWithdraw(deposit.accountNumber(), deposit.amount());
+    public BankResponse withdraw(DepositWithdrawRequest withdraw) throws Exception {
+        validateWithdraw(withdraw.accountNumber(), withdraw.amount());
 
-        User user = userRepository.findByAccountNumber(deposit.accountNumber());
+        User user = userRepository.findByAccountNumber(withdraw.accountNumber());
 
-        user.setAccountBalance(user.getAccountBalance().subtract(deposit.amount()));
+        user.setAccountBalance(user.getAccountBalance().subtract(withdraw.amount()));
         userRepository.save(user);
+
+        EmailDetails emailDetails = new EmailDetails(user.getEmail(),"You have successfully withdrawn " + withdraw.amount() + " from your account!\nNew account balance: $" + user.getAccountBalance() + user.getAccountNumber(),"WITHDRAW SUCCESS");
+        emailService.sendEmailAlert(emailDetails);
 
         return new BankResponse("138", "Withdraw successfully! Current Account balance: " + user.getAccountBalance(),
                 new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
@@ -99,6 +110,12 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(sender);
         userRepository.save(receiver);
+
+        EmailDetails senderEmailAlert = new EmailDetails(sender.getEmail(),"You have successfully transferred $" + transferRequest.amount() + " to " + createUserName(receiver.getFirstName(), receiver.getLastName()) + "!\nNew account balance: $" + sender.getAccountBalance() + sender.getAccountNumber(),"TRANSACTION SUCCESS");
+        emailService.sendEmailAlert(senderEmailAlert);
+
+        EmailDetails receiverEmailAlert = new EmailDetails(receiver.getEmail(),"you received a transaction worth $" + transferRequest.amount() + " from " + createUserName(sender.getFirstName(), sender.getLastName()) + "!\nNew account balance: $" + receiver.getAccountBalance() + receiver.getAccountNumber(),"TRANSACTION RECEIVED SUCCESSFULLY");
+        emailService.sendEmailAlert(receiverEmailAlert);
 
         return new BankResponse("855", "Transfer success", null);
     }
