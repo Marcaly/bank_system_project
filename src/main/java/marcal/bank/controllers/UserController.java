@@ -25,17 +25,17 @@ public class UserController {
     }
 
     @PostMapping("deposit")
-    public BankResponse deposit(@RequestBody DepositWithdrawRequest deposit) throws Exception {
-        return userService.deposit(deposit);
+    public ResponseEntity<BankResponse> deposit(@RequestBody DepositWithdrawRequest deposit) throws Exception {
+        return ResponseEntity.ok(userService.deposit(deposit));
     }
 
     @PostMapping("withdraw")
-    public BankResponse withdraw(@RequestBody DepositWithdrawRequest withdraw) throws Exception {
-        return userService.withdraw(withdraw);
+    public ResponseEntity<BankResponse> withdraw(@RequestBody DepositWithdrawRequest withdraw) throws Exception {
+        return ResponseEntity.ok(userService.withdraw(withdraw));
     }
 
     @PostMapping("transfer")
-    public BankResponse transfer(@RequestBody TransferRequest transferRequest) throws Exception {
-        return userService.transfer(transferRequest);
+    public ResponseEntity<BankResponse> transfer(@RequestBody TransferRequest transferRequest) throws Exception {
+        return ResponseEntity.ok(userService.transfer(transferRequest));
     }
 }
