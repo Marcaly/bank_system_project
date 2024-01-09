@@ -3,6 +3,7 @@ package marcal.bank.services.impl;
 import marcal.bank.entities.User;
 import marcal.bank.entities.records.*;
 import marcal.bank.repositories.UserRepository;
+import marcal.bank.services.TransactionService;
 import marcal.bank.services.UserService;
 import marcal.bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     EmailServiceImpl emailService;
+
+    @Autowired
+    TransactionService transactionService;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -78,6 +82,9 @@ public class UserServiceImpl implements UserService {
 
         EmailDetails emailDetails = new EmailDetails(user.getEmail(),"you deposited successfully " + deposit.amount() + " in you account!\nNew account balance: $" + user.getAccountBalance() + user.getAccountNumber(),"DEPOSIT SUCCESS");
         emailService.sendEmailAlert(emailDetails);
+        TransactionRecord transactionRecord = new TransactionRecord("Deposit", deposit.amount(), user.getAccountNumber(), user.getStatus());
+        transactionService.saveTransaction(transactionRecord);
+
         return new BankResponse("137", "Account has been successfully debited",
                 new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
     }
@@ -93,6 +100,9 @@ public class UserServiceImpl implements UserService {
 
         EmailDetails emailDetails = new EmailDetails(user.getEmail(),"You have successfully withdrawn " + withdraw.amount() + " from your account!\nNew account balance: $" + user.getAccountBalance() + user.getAccountNumber(),"WITHDRAW SUCCESS");
         emailService.sendEmailAlert(emailDetails);
+
+        TransactionRecord transactionRecord = new TransactionRecord("Withdraw", withdraw.amount(), user.getAccountNumber(), user.getStatus());
+        transactionService.saveTransaction(transactionRecord);
 
         return new BankResponse("138", "Withdraw successfully! Current Account balance: " + user.getAccountBalance(),
                 new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
@@ -116,6 +126,13 @@ public class UserServiceImpl implements UserService {
 
         EmailDetails receiverEmailAlert = new EmailDetails(receiver.getEmail(),"you received a transaction worth $" + transferRequest.amount() + " from " + createUserName(sender.getFirstName(), sender.getLastName()) + "!\nNew account balance: $" + receiver.getAccountBalance() + receiver.getAccountNumber(),"TRANSACTION RECEIVED SUCCESSFULLY");
         emailService.sendEmailAlert(receiverEmailAlert);
+
+        TransactionRecord senderTransaction = new TransactionRecord("Transfer", transferRequest.amount(), sender.getAccountNumber(), sender.getStatus());
+        TransactionRecord receiverTransaction = new TransactionRecord("Transfer", transferRequest.amount(), receiver.getAccountNumber(), receiver.getStatus());
+
+        transactionService.saveTransaction(senderTransaction);
+        transactionService.saveTransaction(receiverTransaction);
+
 
         return new BankResponse("855", "Transfer success", null);
     }
