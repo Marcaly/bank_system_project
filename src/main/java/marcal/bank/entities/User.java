@@ -17,6 +17,7 @@ public class User {
     private Long id;
     private String firstName;
     private String lastName;
+    private String otherName;
     @Column(unique = true)
     private String email;
     private String address;
@@ -33,9 +34,10 @@ public class User {
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String address, String stateOfOrigin, String accountNumber, BigDecimal accountBalance, String status) {
+    public User(String firstName, String lastName, String otherName, String email, String address, String stateOfOrigin, String accountNumber, BigDecimal accountBalance, String status) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.otherName = otherName;
         this.email = email;
         this.address = address;
         this.stateOfOrigin = stateOfOrigin;
@@ -60,6 +62,14 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getOtherName() {
+        return otherName;
+    }
+
+    public void setOtherName(String otherName) {
+        this.otherName = otherName;
     }
 
     public String getEmail() {

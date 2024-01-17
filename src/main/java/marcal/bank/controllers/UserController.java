@@ -2,7 +2,6 @@ package marcal.bank.controllers;
 
 import marcal.bank.entities.records.*;
 import marcal.bank.services.UserService;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

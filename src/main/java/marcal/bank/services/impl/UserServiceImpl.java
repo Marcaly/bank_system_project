@@ -23,10 +23,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     TransactionService transactionService;
 
+
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
 
-        User newUser = new User(userRequest.firstName(), userRequest.lastName(), userRequest.email(),
+        User newUser = new User(userRequest.firstName(), userRequest.lastName(), userRequest.otherName(), userRequest.email(),
                 userRequest.address(), userRequest.stateOfOrigin(), AccountUtils.generateAccountNumber(),
                 BigDecimal.ZERO, "ACTIVE");
 
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
         EmailDetails emailDetails = new EmailDetails(userRequest.email(), "Account successfully created.\nYour account number is: " + newUser.getAccountNumber(),"ACCOUNT CREATION");
         emailService.sendEmailAlert(emailDetails);
 
-        return new BankResponse("003", "Account successfully created", new AccountInfo(createUserName(newUser.getFirstName(), newUser.getLastName()), newUser.getAccountBalance(), newUser.getAccountNumber()));
+        return new BankResponse("003", "Account successfully created", new AccountInfo(AccountUtils.createUserName(newUser.getFirstName(), newUser.getLastName(),newUser.getOtherName()), newUser.getAccountBalance(), newUser.getAccountNumber()));
     }
 
 
@@ -47,10 +48,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public String createUserName(String firstName, String lastName) {
-        return firstName + " " + lastName;
-    }
+
 
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest enquiryRequest) throws Exception {
@@ -58,7 +56,7 @@ public class UserServiceImpl implements UserService {
         User foundUser = userRepository.findByAccountNumber(enquiryRequest.accountNumber());
 
         return new BankResponse("004", "Account was successfully found",
-                new AccountInfo(createUserName(foundUser.getFirstName(), foundUser.getLastName()),
+                new AccountInfo(AccountUtils.createUserName(foundUser.getFirstName(), foundUser.getLastName(), foundUser.getOtherName()),
                         foundUser.getAccountBalance(), foundUser.getAccountNumber()));
     }
 
@@ -86,7 +84,7 @@ public class UserServiceImpl implements UserService {
         transactionService.saveTransaction(transactionRecord);
 
         return new BankResponse("137", "Account has been successfully debited",
-                new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
+                new AccountInfo(AccountUtils.createUserName(user.getFirstName(), user.getLastName(),user.getOtherName()), user.getAccountBalance(), user.getAccountNumber()));
     }
 
     @Override
@@ -105,7 +103,7 @@ public class UserServiceImpl implements UserService {
         transactionService.saveTransaction(transactionRecord);
 
         return new BankResponse("138", "Withdraw successfully! Current Account balance: " + user.getAccountBalance(),
-                new AccountInfo(createUserName(user.getFirstName(),user.getLastName()),user.getAccountBalance(),user.getAccountNumber()));
+                new AccountInfo(AccountUtils.createUserName(user.getFirstName(),user.getLastName(),user.getOtherName()),user.getAccountBalance(),user.getAccountNumber()));
     }
 
     @Override
@@ -121,10 +119,10 @@ public class UserServiceImpl implements UserService {
         userRepository.save(sender);
         userRepository.save(receiver);
 
-        EmailDetails senderEmailAlert = new EmailDetails(sender.getEmail(),"You have successfully transferred $" + transferRequest.amount() + " to " + createUserName(receiver.getFirstName(), receiver.getLastName()) + "!\nNew account balance: $" + sender.getAccountBalance() + sender.getAccountNumber(),"TRANSACTION SUCCESS");
+        EmailDetails senderEmailAlert = new EmailDetails(sender.getEmail(),"You have successfully transferred $" + transferRequest.amount() + " to " + AccountUtils.createUserName(receiver.getFirstName(), receiver.getLastName(),receiver.getOtherName()) + "!\nNew account balance: $" + sender.getAccountBalance() + sender.getAccountNumber(),"TRANSACTION SUCCESS");
         emailService.sendEmailAlert(senderEmailAlert);
 
-        EmailDetails receiverEmailAlert = new EmailDetails(receiver.getEmail(),"you received a transaction worth $" + transferRequest.amount() + " from " + createUserName(sender.getFirstName(), sender.getLastName()) + "!\nNew account balance: $" + receiver.getAccountBalance() + receiver.getAccountNumber(),"TRANSACTION RECEIVED SUCCESSFULLY");
+        EmailDetails receiverEmailAlert = new EmailDetails(receiver.getEmail(),"you received a transaction worth $" + transferRequest.amount() + " from " + AccountUtils.createUserName(sender.getFirstName(), sender.getLastName(),sender.getOtherName()) + "!\nNew account balance: $" + receiver.getAccountBalance() + receiver.getAccountNumber(),"TRANSACTION RECEIVED SUCCESSFULLY");
         emailService.sendEmailAlert(receiverEmailAlert);
 
         TransactionRecord senderTransaction = new TransactionRecord("Transfer", transferRequest.amount(), sender.getAccountNumber(), sender.getStatus());

@@ -9,7 +9,6 @@ public interface UserService {
     BankResponse createAccount(UserRequest userRequest);
 
     void verifyIfUserExists(String accountNumber) throws Exception;
-    String createUserName(String firstName, String LastName);
 
     BankResponse balanceEnquiry(EnquiryRequest enquiryRequest) throws Exception;
 
