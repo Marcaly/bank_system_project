@@ -13,7 +13,7 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping
+    @PostMapping("createUser")
     public ResponseEntity<BankResponse> createAccount(@RequestBody UserRequest userRequest) {
         return ResponseEntity.ok().body(userService.createAccount(userRequest));
     }

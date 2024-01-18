@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
         verifyIfUserExists(accountNumber);
 
         if (user.getAccountBalance().compareTo(amount) < 0) {
-            throw new Exception("Insuficient balance");
+            throw new Exception("Insufficient balance");
         }
     }
 
@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
         user.setAccountBalance(user.getAccountBalance().add(deposit.amount()));
         userRepository.save(user);
 
-        EmailDetails emailDetails = new EmailDetails(user.getEmail(),"you deposited successfully " + deposit.amount() + " in you account!\nNew account balance: $" + user.getAccountBalance() + user.getAccountNumber(),"DEPOSIT SUCCESS");
+        EmailDetails emailDetails = new EmailDetails(user.getEmail(),"You deposited successfully " + deposit.amount() + " in you account!\nNew account balance: $"  + user.getAccountBalance() + user.getAccountNumber(),"DEPOSIT SUCCESS");
         emailService.sendEmailAlert(emailDetails);
         TransactionRecord transactionRecord = new TransactionRecord("Deposit", deposit.amount(), user.getAccountNumber(), user.getStatus());
         transactionService.saveTransaction(transactionRecord);
