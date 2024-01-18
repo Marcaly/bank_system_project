@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk AS build
+FROM openjdk:21-jdk-slim AS build
 
 RUN apt-get update -y
 RUN apt-get install open-jdk-21-jdk -y
@@ -7,7 +7,7 @@ COPY . .
 RUN apt-get install maven -y
 RUN mvn clean install
 
-FROM openjdk:21-jdk
+FROM openjdk:21-jdk-slim
 
 EXPOSE 8080
 
