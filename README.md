@@ -1,5 +1,7 @@
 # BANKING SYSTEM
 
+Banking System Project that is capable of creating a user, conducting deposits, withdrawals, performing transfers between users, checking user balances, and consult the transaction history of a user over a specific time period.
+
 ## Technologies
 
 * Java - version 21
